@@ -1,21 +1,34 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views import View
 from .form import HabitForm
-from .utils import get_total_xp, calculate_level
+from .utils import get_total_xp, calculate_level, get_level_info
 from django.utils.decorators import method_decorator
 from .models import Habit, HabitLog, Badge, UserBadge
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db.models import Count, Sum, F, Q
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(View):
     def get(self, request):
+        habits_with_stats = Habit.objects.filter(user=request.user).annotate(
+            completion_count=Count("habitlog", filter=Q(habitlog__completed=True)),
+            total_xp_from_habit=F('xp_reward') * Count('habitlog', filter=Q(habitlog__completed=True))
+        ).order_by('-total_xp_from_habit')
+
+        total_xp = get_total_xp(request.user)
+        level_info = get_level_info(total_xp)
+
         total_xp = get_total_xp(request.user) #ToDO: нужно, чтобы мы получали total xp для каждой привычки отдельно
         level = calculate_level(total_xp)
         badges = UserBadge.objects.filter(user=request.user).select_related('badge')
-        return render(request, 'habits/profile.html', {'total_xp': total_xp, 'level': level,'badges': badges ,'habits': Habit.objects.filter(user=request.user)})
+        return render(request, 'habits/profile.html', {'total_xp': total_xp, 'level': level,
+        'badges': badges, 'habits_with_stats':habits_with_stats ,'habits': Habit.objects.filter(user=request.user),
+        'xp_for_next_level': level_info['xp_for_next'], 'xp_needed': level_info['xp_needed'], 'progress_percent': level_info['progress_percent'],
+        })
 
 @method_decorator(login_required, name='dispatch')
 class CreateHabitView(View):
@@ -40,6 +53,7 @@ class CreateHabitView(View):
 @method_decorator(login_required, name='dispatch')
 class CompleteHabitView(View):
     def get(self, request, *args, **kwargs):
+        import math
         habit = get_object_or_404(Habit, id=self.kwargs['id'])
         if habit.user == request.user:
             HabitLog.objects.create(habit=habit)
@@ -49,6 +63,20 @@ class CompleteHabitView(View):
             check_habits_count(3, request.user)
             check_100xp(request.user)
 
+            total_xp = get_total_xp(request.user)
+            old_level = int(math.sqrt(total_xp - habit.xp_reward))  # уровеньДО
+            new_level = int(math.sqrt(total_xp))
+
+            response_data = {
+                'success': True,
+                'xp_gained': habit.xp_reward,
+                'total_xp': total_xp,
+                'level_up': new_level > old_level,
+                'new_level': new_level,
+            }
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse(response_data)
         return redirect('habits:profile')
 
 @method_decorator(login_required, name='dispatch')
