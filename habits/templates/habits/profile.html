@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <h1>Профиль</h1>
+    <p>Твой XP: <strong>{{total_xp}}</strong></p>
+    <a href="/admin/">Вернуться в админку</a>
+    <h2>Твои привычки</h2>
+    <p><a href="{% url 'habits:create_habit' %}":>Добавить привычку</a></p>
+    <ul>
+        {% for habit in habits %}
+            <li>{{habit.name}} ({{habit.xp_reward}}XP) | Level: <strong>{{level}}</strong></li>
+        <a href="{% url 'habits:complete_habit' habit.id %}">  Выполнить сегодня</a>
+        <a href="{% url 'habits:delete_habit' habit.id %}" onclick="return confirm('Точно удалить?')">  Удалить</a>
+        {% empty %}
+            <li>У тебя пока нет привычек</li>
+        {% endfor %}
+    </ul>
+    <h3>Твои награды: </h3>
+    <ul>
+        {% for ub in badges %}
+            <li>{{ub.badge.name}} - {{ub.awarded_at|date:"d.m.Y"}}</li>
+        {% empty %}
+            <li>Нет наград</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
