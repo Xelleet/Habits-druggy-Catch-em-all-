@@ -1,367 +1,154 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Профиль</title>
+    <title>Title</title>
     <style>
-        :root {
-            --primary: #1976D2;
-            --primary-light: #42A5F5;
-            --success: #4CAF50;
-            --success-light: #8BC34A;
-            --bg: #f5f7fa;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-            --border-radius: 16px;
-            --shadow: 0 6px 16px rgba(0,0,0,0.08);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1, h2, h3 {
-            color: var(--text);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .xp-display {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .level-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            margin: 24px 0;
-            transition: transform 0.2s;
-        }
-
-        .level-card:hover {
-            transform: translateY(-2px);
-        }
-
         .progress-bar {
-            width: 100%;
-            height: 16px;
-            background: #e0e0e0;
-            border-radius: 8px;
-            overflow: hidden;
-            margin: 16px 0;
-        }
+   width: 100%;
+   height: 20px;
+   background: #e0e0e0;
+   border-radius: 10px;
+   overflow: hidden;
+   margin: 8px 0;
+}
+.progress {
+   height: 100%;
+   background: #4CAF50;
+   transition: width 0.5s ease;
+}
+.notification {
+   position: fixed;
+   top: 20px;
+   right: 20px;
+   background: #4CAF50;
+   color: white;
+   padding: 12px 20px;
+   border-radius: 6px;
+   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+   z-index: 1000;
+   animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+}
+@keyframes slideIn {
+   from { transform: translateX(100%); opacity: 0; }
+   to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+   to { opacity: 0; transform: translateX(100%); }
+}
 
-        .progress {
-            height: 100%;
-            background: linear-gradient(to right, var(--success), var(--success-light));
-            border-radius: 8px;
-            width: 0;
-            transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .xp-info, .level-info {
-            font-weight: 600;
-        }
-
-        .level-info {
-            font-size: 22px;
-            margin-bottom: 8px;
-        }
-
-        .habit-item {
-            background: var(--card-bg);
-            padding: 18px;
-            margin: 16px 0;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .habit-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            display: inline-block;
-            transition: opacity 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-danger {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-        }
-
-        .badge-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .badge-list li {
-            background: #e3f2fd;
-            padding: 10px 14px;
-            margin: 8px 0;
-            border-radius: 10px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--success);
-            color: white;
-            padding: 14px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-            z-index: 1000;
-            animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            to { opacity: 0; transform: translateX(120%); }
-        }
-
-        .habit-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .habit-list li {
-            padding: 12px;
-            background: white;
-            margin: 8px 0;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-
-        @media (max-width: 600px) {
-            .habit-actions {
-                flex-direction: column;
-            }
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-        }
     </style>
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+
+    </script>
 </head>
 <body>
-    <div class="header">
-        <h1>Профиль</h1>
-        <div class="xp-display">XP: <strong id="total-xp">{{ total_xp }}</strong></div>
-    </div>
-
-    <p><a href="/admin/">← Вернуться в админку</a></p>
-
+    <h1>Профиль</h1>
+    <p>Твой XP: <strong>{{total_xp}}</strong></p>
+    <a href="/admin/">Вернуться в админку</a>
     <h2>Твои привычки</h2>
-    <p><a class="btn btn-primary" href="{% url 'habits:create_habit' %}">➕ Добавить привычку</a></p>
-
-    <ul class="habit-list" id="habit-list-simple">
+    <p><a href="{% url 'habits:create_habit' %}":>Добавить привычку</a></p>
+    <ul>
         {% for habit in habits %}
-            <li>{{ habit.name }} ({{ habit.xp_reward }} XP) | Уровень: <strong>{{ level }}</strong></li>
+            <li>{{habit.name}} ({{habit.xp_reward}}XP) | Level: <strong>{{level}}</strong></li>
         {% empty %}
             <li>У тебя пока нет привычек</li>
         {% endfor %}
     </ul>
-
-    <!-- Уровень -->
-    <div class="level-card" id="level-card">
-        <div class="level-info">Уровень: <strong id="current-level">{{ level }}</strong></div>
-        {% if xp_for_next_level %}
-            <div class="xp-info">XP: <span id="xp-current">{{ total_xp }}</span> / <span id="xp-next">{{ xp_for_next_level }}</span></div>
-            <div class="progress-bar">
-                <div class="progress" id="progress-bar" style="width: {{ progress_percent }}%"></div>
-            </div>
-            <p id="xp-needed-text">
-                {% if xp_needed > 0 %}
-                    Ещё {{ xp_needed }} XP до уровня {{ level|add:"1" }}
-                {% else %}
-                    Поздравляем! Ты достиг максимума (пока)!
-                {% endif %}
-            </p>
-        {% else %}
-            <div class="xp-info">XP: {{ total_xp }}</div>
-            <p>Ты достиг максимального уровня! 🎉</p>
-        {% endif %}
+    <div class="level-box">
+    <p id="level-display">Уровень: <strong>{{ level }}</strong></p>
+    <p id="xp-display">XP: {{ total_xp }} / {{ xp_for_next_level }}</p>
+    <div class="progress-bar">
+        <div class="progress" id="progress-bar" style="width: {{ progress_percent }}%"></div>
     </div>
+    <p id="xp-needed">
+        {% if xp_needed > 0 %}
+            Ещё {{ xp_needed }} XP до уровня {{ level|add:"1" }}
+        {% else %}
+            Поздравляем! Ты достиг максимума (пока)!
+        {% endif %}
+    </p>
+</div>
 
     <h2>Статистика по привычкам</h2>
-    <div id="habits-stats-container">
-        {% for habit in habits_with_stats %}
-            <div class="habit-item" data-habit-id="{{ habit.id }}">
-                <strong>{{ habit.name }}</strong>
-                {% if habit.description %}
-                    <br><em>{{ habit.description }}</em>
-                {% endif %}
-                <br>Выполнено: <strong id="completion-{{ habit.id }}">{{ habit.completion_count }}</strong> раз —
-                <strong id="xp-{{ habit.id }}">{{ habit.total_xp_from_habit }}</strong> XP
-                <div class="habit-actions">
-                    <a class="btn btn-primary complete-btn" data-habit-id="{{ habit.id }}" href="{% url 'habits:complete_habit' habit.id %}">✅ Выполнить сегодня</a>
-                    <a class="btn btn-danger" href="{% url 'habits:delete_habit' habit.id %}" onclick="return confirm('Точно удалить?')">🗑 Удалить</a>
-                </div>
-            </div>
-        {% empty %}
-            <p>Нет привычек для отображения.</p>
-        {% endfor %}
-    </div>
-
-    <h3>Твои награды:</h3>
-    <ul class="badge-list" id="badge-list">
+    {% for habit in habits_with_stats %}
+        <strong>{{habit.name}}</strong>
+    {% if habit.description %}<br><em>{{habit.description}}</em> {%endif%}
+    <br>Выполнено: <strong>{{habit.completion_count}}</strong> раз
+    <strong>{{habit.total_xp_from_habit}}</strong>XP
+    <a href="{% url 'habits:complete_habit' habit.id %}">  Выполнить сегодня</a>
+        <a href="{% url 'habits:delete_habit' habit.id %}" onclick="return confirm('Точно удалить?')">  Удалить</a>
+    {% endfor %}
+    <h3>Твои награды: </h3>
+    <ul>
         {% for ub in badges %}
-            <li>{{ ub.badge.name }} — {{ ub.awarded_at|date:"d.m.Y" }}</li>
+            <li>{{ub.badge.name}} - {{ub.awarded_at|date:"d.m.Y"}}</li>
         {% empty %}
             <li>Нет наград</li>
         {% endfor %}
     </ul>
+<script>
+function showNotification(text, type = 'success') {
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+    notif.style.background = type === 'success' ? '#4CAF50' : '#2196F3';
+    notif.textContent = text;
+    document.body.appendChild(notif);
+    setTimeout(() => {
+        if (notif.parentNode) notif.remove();
+    }, 3000);
+}
 
-    <script>
-        const csrfToken = '{{ csrf_token }}';
+// AJAX для кнопок "Выполнить сегодня"
+document.querySelectorAll('a[href*="/complete/"]').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = this.href;
 
-        function showNotification(text, isSuccess = true) {
-            const notif = document.createElement('div');
-            notif.className = 'notification';
-            notif.style.background = isSuccess ? '#4CAF50' : '#F44336';
-            notif.textContent = text;
-            document.body.appendChild(notif);
-            setTimeout(() => {
-                if (notif.parentNode) notif.remove();
-            }, 3000);
-        }
-
-        // Универсальная функция обновления статистики
-        function updateUI(data) {
-            // Обновляем XP и уровень
-            document.getElementById('total-xp').textContent = data.total_xp;
-            document.getElementById('current-level').textContent = data.level;
-            document.getElementById('xp-current').textContent = data.total_xp;
-
-            const levelCard = document.getElementById('level-card');
-
-            if (data.xp_for_next_level !== null && data.xp_for_next_level > 0) {
-                document.getElementById('xp-next').textContent = data.xp_for_next_level;
-                const progressPercent = Math.min(100, (data.total_xp / data.xp_for_next_level) * 100);
-                document.getElementById('progress-bar').style.width = `${progressPercent}%`;
-
-                const neededText = data.xp_needed > 0
-                    ? `Ещё ${data.xp_needed} XP до уровня ${data.level + 1}`
-                    : 'Поздравляем! Ты достиг максимума (пока)!';
-                document.getElementById('xp-needed-text').textContent = neededText;
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
             }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновляем XP
+                document.getElementById('xp-display').textContent = `XP: ${data.total_xp} / ${data.xp_for_next_level}`;
 
-            // Обновляем статистику по привычкам (если есть)
-            if (data.habits_with_stats) {
-                const container = document.getElementById('habits-stats-container');
-                let html = '';
-                for (const habit of data.habits_with_stats) {
-                    html += `
-                        <div class="habit-item" data-habit-id="${habit.id}">
-                            <strong>${habit.name}</strong>
-                            ${habit.description ? `<br><em>${habit.description}</em>` : ''}
-                            <br>Выполнено: <strong id="completion-${habit.id}">${habit.completion_count}</strong> раз —
-                            <strong id="xp-${habit.id}">${habit.total_xp_from_habit}</strong> XP
-                            <div class="habit-actions">
-                                <a class="btn btn-primary complete-btn" data-habit-id="${habit.id}" href="/habits/complete/${habit.id}/">✅ Выполнить сегодня</a>
-                                <a class="btn btn-danger" href="/habits/delete/${habit.id}/" onclick="return confirm('Точно удалить?')">🗑 Удалить</a>
-                            </div>
-                        </div>
-                    `;
-                }
-                container.innerHTML = html;
-                rebindCompleteButtons(); // Перепривязываем обработчики
-            }
+                // Обновляем уровень
+                document.getElementById('level-display').innerHTML = `Уровень: <strong>${data.level}</strong>`;
 
-            // Обновляем награды (если пришли)
-            if (data.badges) {
-                const badgeList = document.getElementById('badge-list');
-                let badgeHtml = '';
-                if (data.badges.length > 0) {
-                    for (const ub of data.badges) {
-                        badgeHtml += `<li>${ub.badge.name} — ${ub.awarded_at}</li>`;
-                    }
+                // Обновляем прогресс-бар
+                const progressPercent = (data.total_xp / data.xp_for_next_level) * 100;
+                document.getElementById('progress-bar').style.width = `${Math.min(100, progressPercent)}%`;
+
+                // Обновляем текст о недостающем XP
+                const xpNeededEl = document.getElementById('xp-needed');
+                if (data.xp_needed > 0) {
+                    xpNeededEl.textContent = `Ещё ${data.xp_needed} XP до уровня ${data.level + 1}`;
                 } else {
-                    badgeHtml = '<li>Нет наград</li>';
+                    xpNeededEl.textContent = 'Поздравляем! Ты достиг максимума (пока)!';
                 }
-                badgeList.innerHTML = badgeHtml;
+
+                // Показ уведомлений
+                showNotification(`+${data.xp_gained} XP!`, 'success');
+                if (data.level_up) {
+                    showNotification(`Новый уровень: ${data.new_level}!`, 'success');
+                }
+            } else {
+                showNotification(data.message || 'Что-то пошло не так.', 'error');
             }
-        }
-
-        function rebindCompleteButtons() {
-            document.querySelectorAll('.complete-btn').forEach(btn => {
-                btn.addEventListener('click', handleCompleteClick);
-            });
-        }
-
-        function handleCompleteClick(e) {
-            e.preventDefault();
-            const habitId = this.dataset.habitId;
-            const url = `/habits/complete/${habitId}/`;
-
-            fetch(url, {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateUI(data);
-                    showNotification(`+${data.xp_gained} XP!`, true);
-                    if (data.level_up) {
-                        showNotification(`🎉 Новый уровень: ${data.new_level}!`, true);
-                    }
-                } else {
-                    showNotification(data.message || 'Не удалось выполнить привычку.', false);
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showNotification('Произошла ошибка.', false);
-            });
-        }
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', () => {
-            rebindCompleteButtons();
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showNotification('Не удалось обновить привычку.', 'error');
         });
-    </script>
+    });
+});
+</script>
 </body>
 </html>
