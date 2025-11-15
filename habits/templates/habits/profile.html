@@ -1,154 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль</title>
     <style>
-        .progress-bar {
-   width: 100%;
-   height: 20px;
-   background: #e0e0e0;
-   border-radius: 10px;
-   overflow: hidden;
-   margin: 8px 0;
-}
-.progress {
-   height: 100%;
-   background: #4CAF50;
-   transition: width 0.5s ease;
-}
-.notification {
-   position: fixed;
-   top: 20px;
-   right: 20px;
-   background: #4CAF50;
-   color: white;
-   padding: 12px 20px;
-   border-radius: 6px;
-   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-   z-index: 1000;
-   animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
-}
-@keyframes slideIn {
-   from { transform: translateX(100%); opacity: 0; }
-   to { transform: translateX(0); opacity: 1; }
-}
-@keyframes fadeOut {
-   to { opacity: 0; transform: translateX(100%); }
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            margin: 24px 0 16px;
+            color: #2c3e50;
+        }
+
+        h1 {
+            font-size: 2rem;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #2980b9;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-top: 20px;
+        }
+
+        a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .level-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .habit-item {
+            background: #fff;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .habit-info {
+            flex: 1 1 200px;
+            margin-bottom: 10px;
+        }
+
+        .habit-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .habit-controls a {
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: #e0e0e0;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .habit-controls a:hover {
+            background: #d0d0d0;
+            text-decoration: none;
+        }
+
+        .complete-btn {
+            background: #4CAF50;
+            color: white !important;
+        }
+
+        .complete-btn:hover {
+            background: #45a049;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white !important;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+            margin: 8px 0 16px;
+        }
+
+        li {
+            margin: 6px 0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+        }
+
+        .notification.error {
+            background: #f44336;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        .empty-state {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .badge-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .badge-list li {
+            background: #f1f8e9;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 6px 0;
+        }
+
+        footer {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
     </style>
     <script>
         const csrfToken = '{{ csrf_token }}';
-
     </script>
 </head>
 <body>
     <h1>Профиль {{profile.user.username}}</h1>
-    <p>Твой XP: <strong>{{total_xp}}</strong></p>
-    <a href="/admin/">Вернуться в админку</a>
-    <h2>Твои привычки</h2>
-    <p><a href="{% url 'habits:create_habit' %}":>Добавить привычку</a></p>
-    <ul>
-        {% for habit in habits %}
-            <li>{{habit.name}} ({{habit.xp_reward}}XP) | Level: <strong>{{level}}</strong></li>
-        {% empty %}
-            <li>У тебя пока нет привычек</li>
-        {% endfor %}
-    </ul>
-    <div class="level-box">
-    <p id="level-display">Уровень: <strong>{{ level }}</strong></p>
-    <p id="xp-display">XP: {{ total_xp }} / {{ xp_for_next_level }}</p>
-    <div class="progress-bar">
-        <div class="progress" id="progress-bar" style="width: {{ progress_percent }}%"></div>
+
+    <div class="profile-header">
+        <p>Твой XP: <strong>{{total_xp}}</strong></p>
     </div>
-    <p id="xp-needed">
-        {% if xp_needed > 0 %}
-            Ещё {{ xp_needed }} XP до уровня {{ level|add:"1" }}
-        {% else %}
-            Поздравляем! Ты достиг максимума (пока)!
-        {% endif %}
-    </p>
-</div>
+
+    <h2>Твои привычки</h2>
+    <p><a href="{% url 'habits:create_habit' %}">Добавить привычку</a></p>
+
+    {% if habits %}
+        <ul style="list-style: none; padding: 0;">
+            {% for habit in habits %}
+                <li>{{habit.name}} ({{habit.xp_reward}} XP) | Level: <strong>{{level}}</strong></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-state">У тебя пока нет привычек</p>
+    {% endif %}
+
+    <div class="level-box">
+        <p id="level-display">Уровень: <strong>{{ level }}</strong></p>
+        <p id="xp-display">XP: {{ total_xp }} / {{ xp_for_next_level }}</p>
+        <div class="progress-bar">
+            <div class="progress" id="progress-bar" style="width: {{ progress_percent }}%"></div>
+        </div>
+        <p id="xp-needed">
+            {% if xp_needed > 0 %}
+                Ещё {{ xp_needed }} XP до уровня {{ level|add:"1" }}
+            {% else %}
+                Поздравляем! Ты достиг максимума (пока)!
+            {% endif %}
+        </p>
+    </div>
 
     <h2>Статистика по привычкам</h2>
     {% for habit in habits_with_stats %}
-        <strong>{{habit.name}}</strong>
-    {% if habit.description %}<br><em>{{habit.description}}</em> {%endif%}
-    <br>Выполнено: <strong>{{habit.completion_count}}</strong> раз
-    <strong>{{habit.total_xp_from_habit}}</strong>XP
-    <a href="{% url 'habits:complete_habit' habit.id %}">  Выполнить сегодня</a>
-        <a href="{% url 'habits:delete_habit' habit.id %}" onclick="return confirm('Точно удалить?')">  Удалить</a>
+        <div class="habit-item">
+            <div class="habit-info">
+                <strong>{{habit.name}}</strong>
+                {% if habit.description %}
+                    <br><em>{{habit.description}}</em>
+                {% endif %}
+                <br>Выполнено: <strong>{{habit.completion_count}}</strong> раз | Всего XP: <strong>{{habit.total_xp_from_habit}}</strong>
+            </div>
+            <div class="habit-controls">
+                <a href="{% url 'habits:complete_habit' habit.id %}" class="complete-btn">Выполнить сегодня</a>
+                <a href="{% url 'habits:delete_habit' habit.id %}" class="delete-btn" onclick="return confirm('Точно удалить?')">Удалить</a>
+            </div>
+        </div>
+    {% empty %}
+        <p class="empty-state">Нет привычек для отображения.</p>
     {% endfor %}
-    <h3>Твои награды: </h3>
-    <ul>
+
+    <h3>Твои награды:</h3>
+    <ul class="badge-list">
         {% for ub in badges %}
-            <li>{{ub.badge.name}} - {{ub.awarded_at|date:"d.m.Y"}}</li>
+            <li>{{ub.badge.name}} — {{ub.awarded_at|date:"d.m.Y"}}</li>
         {% empty %}
-            <li>Нет наград</li>
+            <li class="empty-state">Нет наград</li>
         {% endfor %}
     </ul>
-<script>
-function showNotification(text, type = 'success') {
-    const notif = document.createElement('div');
-    notif.className = 'notification';
-    notif.style.background = type === 'success' ? '#4CAF50' : '#2196F3';
-    notif.textContent = text;
-    document.body.appendChild(notif);
-    setTimeout(() => {
-        if (notif.parentNode) notif.remove();
-    }, 3000);
-}
 
-// AJAX для кнопок "Выполнить сегодня"
-document.querySelectorAll('a[href*="/complete/"]').forEach(link => {
-    link.addEventListener('click', function(e) {
-        e.preventDefault();
-        const url = this.href;
+    <script>
+        function showNotification(text, type = 'success') {
+            const notif = document.createElement('div');
+            notif.className = 'notification' + (type === 'error' ? ' error' : '');
+            notif.textContent = text;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                if (notif.parentNode) notif.remove();
+            }, 3000);
+        }
 
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Обновляем XP
-                document.getElementById('xp-display').textContent = `XP: ${data.total_xp} / ${data.xp_for_next_level}`;
+        document.querySelectorAll('a[href*="/complete/"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const url = this.href;
 
-                // Обновляем уровень
-                document.getElementById('level-display').innerHTML = `Уровень: <strong>${data.level}</strong>`;
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('xp-display').textContent = `XP: ${data.total_xp} / ${data.xp_for_next_level}`;
+                        document.getElementById('level-display').innerHTML = `Уровень: <strong>${data.level}</strong>`;
 
-                // Обновляем прогресс-бар
-                const progressPercent = (data.total_xp / data.xp_for_next_level) * 100;
-                document.getElementById('progress-bar').style.width = `${Math.min(100, progressPercent)}%`;
+                        const progressPercent = (data.total_xp / data.xp_for_next_level) * 100;
+                        document.getElementById('progress-bar').style.width = `${Math.min(100, progressPercent)}%`;
 
-                // Обновляем текст о недостающем XP
-                const xpNeededEl = document.getElementById('xp-needed');
-                if (data.xp_needed > 0) {
-                    xpNeededEl.textContent = `Ещё ${data.xp_needed} XP до уровня ${data.level + 1}`;
-                } else {
-                    xpNeededEl.textContent = 'Поздравляем! Ты достиг максимума (пока)!';
-                }
+                        const xpNeededEl = document.getElementById('xp-needed');
+                        if (data.xp_needed > 0) {
+                            xpNeededEl.textContent = `Ещё ${data.xp_needed} XP до уровня ${data.level + 1}`;
+                        } else {
+                            xpNeededEl.textContent = 'Поздравляем! Ты достиг максимума (пока)!';
+                        }
 
-                // Показ уведомлений
-                showNotification(`+${data.xp_gained} XP!`, 'success');
-                if (data.level_up) {
-                    showNotification(`Новый уровень: ${data.new_level}!`, 'success');
-                }
-            } else {
-                showNotification(data.message || 'Что-то пошло не так.', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            showNotification('Не удалось обновить привычку.', 'error');
+                        showNotification(`+${data.xp_gained} XP!`, 'success');
+                        if (data.level_up) {
+                            showNotification(`Новый уровень: ${data.new_level}!`, 'success');
+                        }
+                    } else {
+                        showNotification(data.message || 'Что-то пошло не так.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    showNotification('Не удалось обновить привычку.', 'error');
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 </body>
 </html>

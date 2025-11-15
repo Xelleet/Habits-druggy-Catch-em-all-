@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Лидерборд — Трекер привычек</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        header {
+            background: #4361ee;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .summary {
+            padding: 16px 24px;
+            background: #f1f3f5;
+            text-align: center;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #4361ee;
+            color: white;
+            text-align: left;
+            padding: 14px 20px;
+            font-weight: 600;
+        }
+        td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #eee;
+        }
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+        .rank-cell {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+        }
+        .rank-1 { color: gold; }
+        .rank-2 { color: silver; }
+        .rank-3 { color: #cd7f32; }
+        .you-row {
+            background-color: #e3f2fd !important;
+            font-weight: 600;
+        }
+        .you-badge {
+            background: #2196f3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-left: 8px;
+        }
+        .xp-value {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        .level-value {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin: 20px;
+            color: #4361ee;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 Лидерборд</h1>
+        </header>
+
+        <div class="summary">
+            Ты на <strong>{{ user_rank }}</strong>-м месте из <strong>{{ total_active_users }}</strong>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%">#</th>
+                    <th>Пользователь</th>
+                    <th style="width: 20%">XP</th>
+                    <th style="width: 15%">Уровень</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in leaderboard %}
+                <tr class="{% if profile.user == user %}you-row{% endif %}">
+                    <td class="rank-cell">
+                        {% if forloop.counter == 1 %}<span class="rank-1">1</span>
+                        {% elif forloop.counter == 2 %}<span class="rank-2">2</span>
+                        {% elif forloop.counter == 3 %}<span class="rank-3">3</span>
+                        {% else %}{{ forloop.counter }}{% endif %}
+                    </td>
+                    <td>
+                        {{ profile.user.username }}
+                        {% if profile.user == user %}
+                            <span class="you-badge">ты</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="xp-value">{{ profile.total_xp }}</span> XP</td>
+                    <td><span
+class="level-value">{{ profile.level }}</span></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #666;">
+                        Пока никто не выполнил ни одной привычки 😊
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'habits:profile' %}" class="back-link">← Назад в профиль</a>
+    </div>
+</body>
+</html>

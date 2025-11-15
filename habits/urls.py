@@ -9,4 +9,5 @@ urlpatterns = [
     path('habit/create/', views.CreateHabitView.as_view(), name='create_habit'),
     path('habit/<int:id>/complete/', views.CompleteHabitView.as_view(), name='complete_habit'),
     path('habit/<int:id>/delete/', views.DeleteHabitView.as_view(), name='delete_habit'),
+    path('profile/leaderboard/', views.LeaderboardView.as_view(), name='leaderboard'),
 ]

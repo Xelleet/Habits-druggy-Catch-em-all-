@@ -1,12 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from django.views import View
 from .form import HabitForm
 from .utils import get_total_xp, calculate_level, get_level_info
 from django.utils.decorators import method_decorator
-from .models import Habit, HabitLog, Badge, UserBadge, Profile
+from .models import Habit, HabitLog, Badge, UserBadge, Profile, User
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Count, Sum, F, Q
@@ -47,17 +46,32 @@ class ProfileView(View):
             total_xp_from_habit=F('xp_reward') * Count('habitlog', filter=Q(habitlog__completed=True))
         ).order_by('-total_xp_from_habit')
 
-        total_xp = get_total_xp(request.user)
+        Profile.objects.get(user=request.user).total_xp = get_total_xp(request.user) #ToDO: нужно, чтобы мы получали total xp для каждой привычки отдельно
+        total_xp = Profile.objects.get(user=request.user).total_xp
+        print(total_xp)
+        total_active_users = User.objects.filter(habit__habitlog__completed=True).distinct().count()
+        user_rank = User.objects.filter(
+            profile__total_xp__gt=request.user.profile.total_xp
+        ).count() + 1
+        level = calculate_level(total_xp) #ToDO: По хорошему надо ещё с помощью AJAX передавать изменения не только бара, но и циферок в целом
         level_info = get_level_info(total_xp)
-
-        total_xp = get_total_xp(request.user) #ToDO: нужно, чтобы мы получали total xp для каждой привычки отдельно
-        level = calculate_level(total_xp)
         badges = UserBadge.objects.filter(user=request.user).select_related('badge')
         profile = Profile.objects.get(user=request.user)
-        return render(request, 'habits/profile.html', {'profile': profile, 'total_xp': total_xp, 'level': level,
+        return render(request, 'habits/profile.html', {'profile': profile, 'total_xp': total_xp, 'level': profile.level,
         'badges': badges, 'habits_with_stats':habits_with_stats ,'habits': Habit.objects.filter(user=request.user),
         'xp_for_next_level': level_info['xp_for_next'], 'xp_needed': level_info['xp_needed'], 'progress_percent': level_info['progress_percent'],
+        'user_rank': user_rank, 'total_active_users': total_active_users
         })
+
+@method_decorator(login_required, name='dispatch')
+class LeaderboardView(View):
+    def get(self, request):
+        leaderboard = Profile.objects.filter(total_xp__gt=0).order_by('-total_xp')[:10]
+        total_active_users = User.objects.filter(habit__habitlog__completed=True).distinct().count()
+        user_rank = Profile.objects.filter(
+            total_xp__gt=Profile.objects.get(user=request.user).total_xp
+        ).count() + 1
+        return render(request, 'habits/leaderboard.html', {'leaderboard': leaderboard, 'profile': Profile.objects.get(user=request.user), 'user_rank': user_rank, 'total_active_users': total_active_users})
 
 @method_decorator(login_required, name='dispatch')
 class CreateHabitView(View):
@@ -92,16 +106,21 @@ class CompleteHabitView(View):
             check_habits_count(3, request.user)
             check_100xp(request.user)
 
-            total_xp = get_total_xp(request.user)
-            old_level = int(math.sqrt(total_xp - habit.xp_reward))  # уровеньДО
-            new_level = int(math.sqrt(total_xp))
+            profile = Profile.objects.get(user=request.user)
+            profile.total_xp = get_total_xp(request.user)
+            old_level = int(math.sqrt(profile.total_xp - habit.xp_reward))  # уровеньДО
+            new_level = int(math.sqrt(profile.total_xp))
+
+            profile.level = new_level
+
+            profile.save()
 
             response_data = {
                 'success': True,
                 'xp_gained': habit.xp_reward,
-                'total_xp': total_xp,
+                'total_xp': profile.total_xp,
                 'level_up': new_level > old_level,
-                'new_level': new_level,
+                'new_level': profile.level,
             }
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

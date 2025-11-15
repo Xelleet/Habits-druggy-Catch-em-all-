@@ -13,6 +13,8 @@ class Habit(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    total_xp = models.PositiveIntegerField(default=0, verbose_name="Общий XP")
+    level = models.PositiveIntegerField(default=0, verbose_name="Уровень")
 
 class HabitLog(models.Model):
     habit = models.ForeignKey(Habit, on_delete=models.CASCADE)
