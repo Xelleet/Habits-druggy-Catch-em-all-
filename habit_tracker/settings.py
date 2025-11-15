@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-c+06_g^a4e1^a!$dl$#q++dpwrorhkbswuxyh-7c85y)4a@nqg
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'habit_tracker.onrender.com'
 ]
 
 # Application definition
@@ -38,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'habits'
+    'habits.apps.HabitsConfig'
 ]
 
 MIDDLEWARE = [

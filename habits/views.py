@@ -6,10 +6,38 @@ from django.views import View
 from .form import HabitForm
 from .utils import get_total_xp, calculate_level, get_level_info
 from django.utils.decorators import method_decorator
-from .models import Habit, HabitLog, Badge, UserBadge
+from .models import Habit, HabitLog, Badge, UserBadge, Profile
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Count, Sum, F, Q
+from .form import RegisterForm, LoginForm
+from django.contrib.auth import login
+
+
+class RegisterView(View):
+    def get(self, request):
+        form = RegisterForm()
+        return render(request, 'auth/register.html', {'form': form})
+    def post(self, request):
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('habits:profile')
+        return render(request, 'auth/register.html', {'form': form})
+
+class LoginView(View):
+    def get(self, request):
+        form = LoginForm()
+        return render(request, 'auth/login.html', {'form': form})
+    def post(self, request):
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request ,user)
+            return redirect('habits:profile')
+        return render(request, 'auth/login.html', {'form': form})
+
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(View):
@@ -25,7 +53,8 @@ class ProfileView(View):
         total_xp = get_total_xp(request.user) #ToDO: нужно, чтобы мы получали total xp для каждой привычки отдельно
         level = calculate_level(total_xp)
         badges = UserBadge.objects.filter(user=request.user).select_related('badge')
-        return render(request, 'habits/profile.html', {'total_xp': total_xp, 'level': level,
+        profile = Profile.objects.get(user=request.user)
+        return render(request, 'habits/profile.html', {'profile': profile, 'total_xp': total_xp, 'level': level,
         'badges': badges, 'habits_with_stats':habits_with_stats ,'habits': Habit.objects.filter(user=request.user),
         'xp_for_next_level': level_info['xp_for_next'], 'xp_needed': level_info['xp_needed'], 'progress_percent': level_info['progress_percent'],
         })
