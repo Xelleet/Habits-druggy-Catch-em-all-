@@ -10,4 +10,5 @@ urlpatterns = [
     path('habit/<int:id>/complete/', views.CompleteHabitView.as_view(), name='complete_habit'),
     path('habit/<int:id>/delete/', views.DeleteHabitView.as_view(), name='delete_habit'),
     path('profile/leaderboard/', views.LeaderboardView.as_view(), name='leaderboard'),
+    path('profile/<int:id>/', views.PublicProfileView.as_view(), name='public_profile')
 ]

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль {{ profile_user.username }} — Трекер привычек</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .xp-box { background: #f0f8ff; padding: 15px; border-radius: 8px; }
+        .habits, .badges { margin: 25px 0; }
+        .badge-item { margin: 5px 0; color: #555; }
+        .top-habit { background: #f9f9f9; padding: 10px; margin: 5px 0; border-left: 4px solid #4CAF50; }
+        .action-buttons { margin-top: 20px; text-align: center; }
+        .btn { padding: 10px 20px; background: #2196F3; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 {{ profile.user.username }}</h1>
+        <div class="xp-box">
+            <p><strong>Уровень:</strong> {{ profile.level }} | <strong>XP:</strong> {{ profile.total_xp }}</p>
+            <p>Место в рейтинге: {{ user_rank }}</p>
+        </div>
+    </div>
+
+    <div class="badges">
+        <h2>🎖 Награды</h2>
+        {% for badge in user_badges %}
+            <div class="badge-item">
+                {{ badge.badge__name }}
+                <small>({{ badge.awarded_at|date:"d.m.Y" }})</small>
+            </div>
+        {% empty %}
+            <p>Нет наград.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_owner %}
+        <div class="action-buttons">
+            <a href="{% url 'habits:profile' %}" class="btn">→ Мой профиль</a>
+            <a href="{% url 'habits:leaderboard' %}" class="btn" style="background:#4CAF50;">🏆 Рейтинг</a>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666;">
+            Это публичный профиль. Личные данные скрыты.
+        </p>
+    {% endif %}
+</body>
+</html>

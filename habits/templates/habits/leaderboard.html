@@ -127,10 +127,12 @@
                         {% else %}{{ forloop.counter }}{% endif %}
                     </td>
                     <td>
+                        <a href="{% url 'habits:public_profile' profile.id %}">
                         {{ profile.user.username }}
                         {% if profile.user == user %}
                             <span class="you-badge">ты</span>
                         {% endif %}
+                        </a>
                     </td>
                     <td><span class="xp-value">{{ profile.total_xp }}</span> XP</td>
                     <td><span

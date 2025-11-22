@@ -48,7 +48,6 @@ class ProfileView(View):
 
         Profile.objects.get(user=request.user).total_xp = get_total_xp(request.user) #ToDO: нужно, чтобы мы получали total xp для каждой привычки отдельно
         total_xp = Profile.objects.get(user=request.user).total_xp
-        print(total_xp)
         total_active_users = User.objects.filter(habit__habitlog__completed=True).distinct().count()
         user_rank = User.objects.filter(
             profile__total_xp__gt=request.user.profile.total_xp
@@ -72,6 +71,13 @@ class LeaderboardView(View):
             total_xp__gt=Profile.objects.get(user=request.user).total_xp
         ).count() + 1
         return render(request, 'habits/leaderboard.html', {'leaderboard': leaderboard, 'profile': Profile.objects.get(user=request.user), 'user_rank': user_rank, 'total_active_users': total_active_users})
+
+class PublicProfileView(View):
+    def get(self, request, id):
+        profile = get_object_or_404(Profile, id=id)
+        user_badges = UserBadge.objects.filter(user=profile.user).select_related('badge').order_by('-awarded_at').values("badge__name", 'awarded_at')[:3]
+        user_rank = Profile.objects.filter(total_xp__gt=profile.total_xp).count()+1
+        return render(request, 'habits/public_profile.html', {'profile': profile, 'user_badges': user_badges, 'user_rank': user_rank})
 
 @method_decorator(login_required, name='dispatch')
 class CreateHabitView(View):
@@ -108,19 +114,27 @@ class CompleteHabitView(View):
 
             profile = Profile.objects.get(user=request.user)
             profile.total_xp = get_total_xp(request.user)
-            old_level = int(math.sqrt(profile.total_xp - habit.xp_reward))  # уровеньДО
-            new_level = int(math.sqrt(profile.total_xp))
 
+            # Рассчитываем уровень и прогресс с помощью новой функции
+            level_info = get_level_info(profile.total_xp)
+
+            # Уровень ДО — нужно пересчитать от (total_xp - habit.xp_reward)
+            old_level_info = get_level_info(profile.total_xp - habit.xp_reward)
+            old_level = old_level_info['level']
+            new_level = level_info['level']
+
+            # Обновляем уровень в профиле
             profile.level = new_level
-
             profile.save()
 
             response_data = {
                 'success': True,
                 'xp_gained': habit.xp_reward,
                 'total_xp': profile.total_xp,
+                'xp_for_next_level': level_info['xp_for_next'],
+                'xp_needed': level_info['xp_needed'],
                 'level_up': new_level > old_level,
-                'new_level': profile.level,
+                'level': new_level,
             }
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
